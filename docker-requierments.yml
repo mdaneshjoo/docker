@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 890803306
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: no
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    command: [
+      "redis-server",
+      "--requirepass", "890803306",
+      "--aclfile", "/usr/local/etc/redis/acl.conf"
+    ]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./redis/acl.conf:/usr/local/etc/redis/acl.conf
+    restart: no
+
+volumes:
+  postgres_data:
+  redis_data:
