@@ -1,0 +1,26 @@
+entrypoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+certificatesResolvers:
+  myresolver:
+    acme:
+      email: mohammad.daneshjoo92@gmail.com
+      storage: acme.json
+      httpChallenge:
+        entrypoint: web
+
+providers:
+  docker:
+    exposedByDefault: false
+
+api:
+  insecure: true
+  dashboard: true
+
+experimental:
+  localPlugins:
+    memcachedplugin:
+      moduleName: "github.com/ghnexpress/traefik-cache"

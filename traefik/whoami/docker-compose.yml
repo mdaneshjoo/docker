@@ -1,0 +1,17 @@
+services:
+  whoami:
+    image: "traefik/whoami"  # Minimal container for testing
+    container_name: "whoami"
+    labels:  # Metadata to configure services in Traefik
+      - "traefik.enable=true" #Explicitly tell Traefik to manage this container
+      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)" #Define the rule how to point to this service
+      - "traefik.http.routers.whoami.entrypoints=web" # Specify the entrypoints
+      - "traefik.http.routers.whoami.tls=false" # Enable TLS for this service
+      - "traefik.http.routers.whoami.middlewares=cache-plugin"
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external: true # Tells the container that this network exist and look for it
+    driver: bridge
