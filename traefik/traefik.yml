@@ -3,7 +3,8 @@ entrypoints:
     address: ":80"
   websecure:
     address: ":443"
-
+log:
+  level: ERROR
 certificatesResolvers:
   myresolver:
     acme:
@@ -15,6 +16,9 @@ certificatesResolvers:
 providers:
   docker:
     exposedByDefault: false
+  file:  
+    filename: "/etc/traefik/dynamic.yml"  # Reference to the dynamic configuration file
+
 
 api:
   insecure: true
@@ -22,5 +26,10 @@ api:
 
 experimental:
   localPlugins:
+    traefik-api-key-auth:
+      moduleName: "github.com/Septima/traefik-api-key-auth"
     memcachedplugin:
       moduleName: "github.com/ghnexpress/traefik-cache"
+
+
+       

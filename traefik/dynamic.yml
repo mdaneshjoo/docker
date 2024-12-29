@@ -1,0 +1,46 @@
+http:
+  routers:
+    whoami:
+      rule: "Host(`whoami.localhost`)"
+      entryPoints:
+        - web
+      service: whoami
+      middlewares:
+        - cache-plugin
+        - api-key-auth-plugin
+
+  middlewares:
+    cache-plugin:
+      plugin:
+        memcachedplugin:
+          hashkey:
+            header:
+              enable: true
+              fields: Token,User-Agent
+              ignoreFields: X-Request-Id,Postman-Token,Content-Length
+            body:
+              enable: false
+            method:
+              enable: true
+          memcached:
+            address: memcached-container:11211
+          alert:
+            telegram:
+              chatId: -795576798
+              token: xxx
+          env: dev
+          forceCache:
+            enable: true
+            expiredTime: 10
+
+    api-key-auth-plugin:
+      plugin:
+        traefik-api-key-auth:
+          keys:
+            - "83AB3503-50AA-4B57-9386-B9F0BADF2013"
+
+  services:
+    whoami:
+      loadBalancer:
+        servers:
+          - url: "http://whoami:80"
