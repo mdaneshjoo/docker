@@ -8,7 +8,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./postgresql.conf:/etc/postgresql/postgresql.conf 
+      - ./postgresql.conf:/var/lib/postgresql/data/postgresql.conf # Becareful this will overwrite main config file please get a backup
       - postgres_data:/var/lib/postgresql/data
     restart: no
 
