@@ -10,6 +10,7 @@ services:
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
     restart: no
+    profiles: [ all , essential]
 
   redis:
     image: redis:latest
@@ -25,6 +26,7 @@ services:
       - redis_data:/data
       - ./redis/acl.conf:/usr/local/etc/redis/acl.conf
     restart: no
+    profiles: [ all , essential]
 
   mongodb:
     image: mongo:latest
@@ -36,6 +38,7 @@ services:
     volumes:
       - ./mongo-data:/data/db
     restart: no
+    profiles: [ all , essential]
 
 
   zookeeper:
@@ -43,6 +46,7 @@ services:
     restart: no
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
+    profiles: [ all , kafka]  
 
   kafka:
     image: confluentinc/cp-enterprise-kafka:5.5.3
@@ -61,6 +65,7 @@ services:
     ports:
       - "9092:9092"
       - "29092:29092"
+    profiles: [ all , kafka]  
 
   schema-registry:
     image: confluentinc/cp-schema-registry:5.5.3
@@ -72,6 +77,20 @@ services:
       - 8081:8081
     restart: no
     depends_on: [ zookeeper,kafka ]
+    profiles: [ all , kafka]  
+
+  localstack:
+    image: localstack/localstack
+    restart: no
+    container_name: localstack
+    ports:
+      - "127.0.0.1:4566:4566"  
+      - "127.0.0.1:4510-4559:4510-4559"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      - DEBUG=0
+    profiles: [ all , localstack]  
 
 volumes:
   postgres_data:
