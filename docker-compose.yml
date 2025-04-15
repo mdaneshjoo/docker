@@ -10,23 +10,19 @@ services:
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
     restart: no
-    profiles: [ all , essential]
+    profiles: [ all, essential ]
 
   redis:
     image: redis:latest
     container_name: redis
-    command: [
-      "redis-server",
-      "--requirepass", "890803306",
-      "--aclfile", "/usr/local/etc/redis/acl.conf"
-    ]
+    command: [ "redis-server", "--requirepass", "890803306", "--aclfile", "/usr/local/etc/redis/acl.conf" ]
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
       - ./redis/acl.conf:/usr/local/etc/redis/acl.conf
     restart: no
-    profiles: [ all , essential]
+    profiles: [ all, essential ]
 
   mongodb:
     image: mongo:latest
@@ -39,15 +35,14 @@ services:
     volumes:
       - ./mongo-data:/data/db
     restart: no
-    profiles: [ all , essential]
-
+    profiles: [ all, essential ]
 
   zookeeper:
     image: confluentinc/cp-zookeeper:5.5.3
     restart: no
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
-    profiles: [ all , kafka]  
+    profiles: [ all, kafka ]
 
   kafka:
     image: confluentinc/cp-enterprise-kafka:5.5.3
@@ -66,7 +61,7 @@ services:
     ports:
       - "9092:9092"
       - "29092:29092"
-    profiles: [ all , kafka]  
+    profiles: [ all, kafka ]
 
   schema-registry:
     image: confluentinc/cp-schema-registry:5.5.3
@@ -77,24 +72,38 @@ services:
     ports:
       - 8081:8081
     restart: no
-    depends_on: [ zookeeper,kafka ]
-    profiles: [ all , kafka]  
+    depends_on: [ zookeeper, kafka ]
+    profiles: [ all, kafka ]
 
   localstack:
     image: localstack/localstack
     restart: no
     container_name: localstack
     ports:
-      - "127.0.0.1:4566:4566"           
-      - "127.0.0.1:4510-4559:4510-4559"  
+      - "127.0.0.1:4566:4566"
+      - "127.0.0.1:4510-4559:4510-4559"
     volumes:
       - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
     environment:
       - DEBUG=${DEBUG:-0}
-    profiles: [ all , localstack]  
+    profiles: [ all, localstack ]
+
+  typesense:
+    image: typesense/typesense:28.0
+    container_name: typesense
+    command: >
+      typesense-server --data-dir /data --api-key=${TYPESENSE_API_KEY} --enable-cors
+    ports:
+      - "8108:8108"
+    volumes:
+      - ./typesense-data:/data
+    environment:
+      - TYPESENSE_API_KEY=TYPESENSE_API_KEY
+    profiles: [ all, typesense ]
 
 volumes:
   postgres_data:
   redis_data:
+
 
