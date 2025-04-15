@@ -4,7 +4,7 @@ services:
     container_name: postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 890803306
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -15,7 +15,7 @@ services:
   redis:
     image: redis:latest
     container_name: redis
-    command: [ "redis-server", "--requirepass", "890803306", "--aclfile", "/usr/local/etc/redis/acl.conf" ]
+    command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}", "--aclfile", "/usr/local/etc/redis/acl.conf" ]
     ports:
       - "6379:6379"
     volumes:
@@ -31,7 +31,7 @@ services:
       - '27017:27017'
     environment:
       - MONGO_INITDB_ROOT_USERNAME=emdjoo
-      - MONGO_INITDB_ROOT_PASSWORD=890803306
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
       - ./mongo-data:/data/db
     restart: no
@@ -99,7 +99,19 @@ services:
     volumes:
       - ./typesense-data:/data
     environment:
-      - TYPESENSE_API_KEY=TYPESENSE_API_KEY
+      - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
+    profiles: [ all, typesense ]
+
+  typesense-dashboard:
+    image: bfritscher/typesense-dashboard:latest
+    container_name: typesense-dashboard
+    ports:
+      - "8109:80" 
+    environment:
+      - NODE_ENV=production
+      - TYPESENSE_HOST=http://typesense:8108
+      - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
+    restart: no
     profiles: [ all, typesense ]
 
 volumes:

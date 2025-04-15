@@ -2,3 +2,5 @@ mongo-data
 postgres_data
 volume
 typesense-data
+
+.env
