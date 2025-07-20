@@ -5,30 +5,31 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5432:5432"
+    # network_mode: host
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
     restart: no
     profiles: [ all, essential ]
+    networks:
+      - shared-network
 
   redis:
     image: redis:latest
     container_name: redis
     command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}", "--aclfile", "/usr/local/etc/redis/acl.conf" ]
-    ports:
-      - "6379:6379"
+    # network_mode: host
     volumes:
       - redis_data:/data
       - ./redis/acl.conf:/usr/local/etc/redis/acl.conf
     restart: no
     profiles: [ all, essential ]
+    networks:
+      - shared-network
 
   mongodb:
     image: mongo:latest
     container_name: mongo
-    ports:
-      - '27017:27017'
+    # network_mode: host
     environment:
       - MONGO_INITDB_ROOT_USERNAME=emdjoo
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
@@ -36,6 +37,8 @@ services:
       - ./mongo-data:/data/db
     restart: no
     profiles: [ all, essential ]
+    networks:
+      - shared-network
 
   zookeeper:
     image: confluentinc/cp-zookeeper:5.5.3
@@ -43,6 +46,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
     profiles: [ all, kafka ]
+    networks:
+      - shared-network
 
   kafka:
     image: confluentinc/cp-enterprise-kafka:5.5.3
@@ -62,6 +67,8 @@ services:
       - "9092:9092"
       - "29092:29092"
     profiles: [ all, kafka ]
+    networks:
+      - shared-network
 
   schema-registry:
     image: confluentinc/cp-schema-registry:5.5.3
@@ -74,11 +81,14 @@ services:
     restart: no
     depends_on: [ zookeeper, kafka ]
     profiles: [ all, kafka ]
+    networks:
+      - shared-network
 
   localstack:
     image: localstack/localstack
     restart: no
     container_name: localstack
+    # network_mode: host
     ports:
       - "127.0.0.1:4566:4566"
       - "127.0.0.1:4510-4559:4510-4559"
@@ -88,6 +98,8 @@ services:
     environment:
       - DEBUG=${DEBUG:-0}
     profiles: [ all, localstack ]
+    networks:
+      - shared-network
 
   typesense:
     image: typesense/typesense:28.0
@@ -101,6 +113,8 @@ services:
     environment:
       - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
     profiles: [ all, typesense ]
+    networks:
+      - shared-network
 
   typesense-dashboard:
     image: bfritscher/typesense-dashboard:latest
@@ -113,9 +127,15 @@ services:
       - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
     restart: no
     profiles: [ all, typesense ]
+    networks:
+      - shared-network
 
 volumes:
   postgres_data:
   redis_data:
 
+networks:
+  shared-network:
+    name: shared-network
+    external: true
 
