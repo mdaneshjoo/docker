@@ -24,8 +24,30 @@ if [ -z "$ROOT_USER" ] || [ -z "$ROOT_PASSWORD" ]; then
     exit 1
 fi
 
-# Start mongod (without --auth) to perform first-time initialization
-"$@" &
+# Build args without keyFile/auth for initial unsecured startup
+FILTERED_ARGS=""
+skip_next=0
+for arg in "$@"; do
+  if [ "$skip_next" -eq 1 ]; then
+    skip_next=0
+    continue
+  fi
+  case "$arg" in
+    --keyFile)
+      skip_next=1
+      ;;
+    --keyFile=*)
+      ;;
+    --auth)
+      ;;
+    *)
+      FILTERED_ARGS="$FILTERED_ARGS $arg"
+      ;;
+  esac
+done
+
+# Start mongod (without keyFile/auth) to perform first-time initialization
+eval "$FILTERED_ARGS" &
 MONGOD_PID=$!
 
 # Wait for mongod to be ready
