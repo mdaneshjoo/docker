@@ -33,22 +33,6 @@ services:
     networks:
       - shared-network
 
-  mongodb:
-    image: mongo:latest
-    container_name: mongo
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=emdjoo
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-    volumes:
-      - mongo_data:/data/db
-    restart: no
-    ports:
-      - "27017:27017"
-    profiles: [all, essential, dopin]
-    # network_mode: host
-    networks:
-      - shared-network
-
   mongo_replica:
     image: mongo:latest
     container_name: mongo_replica
@@ -57,7 +41,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=emdjoo
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
     ports:
-      - "27018:27017"
+      - "27017:27017"
     entrypoint: ["sh", "/usr/local/bin/init-replica.sh"]
     command:
       [
@@ -92,6 +76,7 @@ services:
       start_period: 30s
       timeout: 5s
     profiles: [all, essential, dopin]
+    # network_mode: host
     networks:
       - shared-network
 

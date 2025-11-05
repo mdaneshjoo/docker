@@ -62,7 +62,7 @@ done
 
 # Initiate replica set if needed
 echo "Ensuring replica set is initiated..."
-mongosh --quiet --eval "try { rs.status() } catch (e) { rs.initiate({_id:'rs0', members:[{_id:0, host:'mongo_replica:27017'}]}) }"
+mongosh --quiet --eval "try { rs.status() } catch (e) { rs.initiate({_id:'rs0', members:[{_id:0, host:'localhost:27017'}]}) }"
 
 # Wait for PRIMARY state
 echo "Waiting for PRIMARY state..."
