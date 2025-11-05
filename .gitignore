@@ -4,3 +4,6 @@ volume
 typesense-data
 
 .env
+mongo_keyfile_data
+mongo_data_replica
+mongodb_data
