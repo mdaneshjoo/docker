@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:17
     container_name: postgres
     environment:
       POSTGRES_USER: postgres
@@ -8,31 +8,34 @@ services:
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
     restart: no
-    profiles: [all, essential, promom]
-    # network_mode: host
-    networks:
-      - shared-network
+    profiles: [ all, essential, promom ]
+    network_mode: host
+    # networks:
+    # - shared-network
 
   redis:
     image: redis:latest
     container_name: redis
-    command:
-      [
-        "redis-server",
-        "--requirepass",
-        "${REDIS_PASSWORD}",
-        "--aclfile",
-        "/usr/local/etc/redis/acl.conf",
-      ]
+    command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}", "--aclfile", "/usr/local/etc/redis/acl.conf" ]
     volumes:
       - redis_data:/data
       - ./redis/acl.conf:/usr/local/etc/redis/acl.conf
     restart: no
-    profiles: [all, essential, promom]
-    # network_mode: host
+    profiles: [ all, essential, promom ]
+    network_mode: host
+    # networks:
+    # - shared-network
+  clamav:
+    image: clamav/clamav:stable
+    container_name: dopin_clamav
+    restart: always
+    ports:
+      - "3310:3310"
+    volumes:
+      - clamav_data:/var/lib/clamav
     networks:
       - shared-network
-
+    profiles: [ all, dopin ]
   mongo_replica:
     image: mongo:latest
     container_name: mongo_replica
@@ -42,40 +45,19 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
     ports:
       - "27017:27017"
-    entrypoint: ["sh", "/usr/local/bin/init-replica.sh"]
-    command:
-      [
-        "mongod",
-        "--replSet",
-        "rs0",
-        "--bind_ip_all",
-        "--keyFile",
-        "/data/mongo-keyfile",
-      ]
+    entrypoint: [ "sh", "/usr/local/bin/init-replica.sh" ]
+    command: [ "mongod", "--replSet", "rs0", "--bind_ip_all", "--keyFile", "/data/mongo-keyfile" ]
     volumes:
       - ./mongo_data_replica:/data/db
       - ./mongo_keyfile_data:/data
       - ./init-replica.sh:/usr/local/bin/init-replica.sh:ro
     healthcheck:
-      test:
-        [
-          "CMD",
-          "mongosh",
-          "--quiet",
-          "-u",
-          "emdjoo",
-          "-p",
-          "${MONGO_INITDB_ROOT_PASSWORD}",
-          "--authenticationDatabase",
-          "admin",
-          "--eval",
-          "db.adminCommand('ping').ok",
-        ]
+      test: [ "CMD", "mongosh", "--quiet", "-u", "emdjoo", "-p", "${MONGO_INITDB_ROOT_PASSWORD}", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping').ok" ]
       interval: 10s
       retries: 10
       start_period: 30s
       timeout: 5s
-    profiles: [all, essential, dopin]
+    profiles: [ all, essential, dopin ]
     # network_mode: host
     networks:
       - shared-network
@@ -85,13 +67,13 @@ services:
     restart: no
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
-    profiles: [all, kafka]
+    profiles: [ all, kafka ]
     networks:
       - shared-network
 
   kafka:
     image: confluentinc/cp-enterprise-kafka:5.5.3
-    depends_on: [zookeeper]
+    depends_on: [ zookeeper ]
     restart: no
     environment:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
@@ -106,7 +88,7 @@ services:
     ports:
       - "9092:9092"
       - "29092:29092"
-    profiles: [all, kafka]
+    profiles: [ all, kafka ]
     networks:
       - shared-network
 
@@ -119,8 +101,8 @@ services:
     ports:
       - 8081:8081
     restart: no
-    depends_on: [zookeeper, kafka]
-    profiles: [all, kafka]
+    depends_on: [ zookeeper, kafka ]
+    profiles: [ all, kafka ]
     networks:
       - shared-network
 
@@ -137,7 +119,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
     environment:
       - DEBUG=${DEBUG:-0}
-    profiles: [all, localstack]
+    profiles: [ all, localstack ]
     networks:
       - shared-network
 
@@ -152,7 +134,7 @@ services:
       - ./typesense-data:/data
     environment:
       - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
-    profiles: [all, typesense]
+    profiles: [ all, typesense ]
     networks:
       - shared-network
 
@@ -166,7 +148,7 @@ services:
       - TYPESENSE_HOST=http://typesense:8108
       - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
     restart: no
-    profiles: [all, typesense]
+    profiles: [ all, typesense ]
     networks:
       - shared-network
 
@@ -175,6 +157,8 @@ volumes:
   redis_data:
   mongo_data:
   mongo_data_replica:
+  clamav_data:
+
 
 networks:
   shared-network:
