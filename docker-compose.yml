@@ -9,9 +9,11 @@ services:
       - ./postgres_data:/var/lib/postgresql/data
     restart: no
     profiles: [ all, essential, promom ]
-    network_mode: host
-    # networks:
-    # - shared-network
+    # network_mode: host
+    ports:
+      - "5432:5432"
+    networks:
+     - shared-network
 
   redis:
     image: redis:latest
@@ -22,9 +24,11 @@ services:
       - ./redis/acl.conf:/usr/local/etc/redis/acl.conf
     restart: no
     profiles: [ all, essential, promom ]
-    network_mode: host
-    # networks:
-    # - shared-network
+    # network_mode: host
+    ports:
+      - "6379:6379"
+    networks:
+    - shared-network
   clamav:
     image: clamav/clamav:stable
     container_name: dopin_clamav
